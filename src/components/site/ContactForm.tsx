@@ -6,10 +6,43 @@ import { COMPANY } from "@/lib/company";
 
 export function ContactForm() {
   const [sent, setSent] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSent(true);
+    setError(null);
+    setPending(true);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          email: formData.get("email"),
+          phone: formData.get("phone"),
+          message: formData.get("message"),
+        }),
+      });
+
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+
+      if (!res.ok) {
+        setError(data.error || "Could not send your message. Please try again.");
+        return;
+      }
+
+      setSent(true);
+      form.reset();
+    } catch {
+      setError("Could not send your message. Please call or email us directly.");
+    } finally {
+      setPending(false);
+    }
   }
 
   if (sent) {
@@ -37,7 +70,8 @@ export function ContactForm() {
           <input
             required
             name="name"
-            className="mt-2 w-full rounded-md border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-bronze"
+            disabled={pending}
+            className="mt-2 w-full rounded-md border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-bronze disabled:opacity-60"
           />
         </label>
         <label className="block">
@@ -47,7 +81,8 @@ export function ContactForm() {
           <input
             name="phone"
             type="tel"
-            className="mt-2 w-full rounded-md border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-bronze"
+            disabled={pending}
+            className="mt-2 w-full rounded-md border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-bronze disabled:opacity-60"
           />
         </label>
       </div>
@@ -59,7 +94,8 @@ export function ContactForm() {
           required
           name="email"
           type="email"
-          className="mt-2 w-full rounded-md border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-bronze"
+          disabled={pending}
+          className="mt-2 w-full rounded-md border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-bronze disabled:opacity-60"
         />
       </label>
       <label className="mt-5 block">
@@ -70,14 +106,17 @@ export function ContactForm() {
           required
           name="message"
           rows={5}
-          className="mt-2 w-full resize-y rounded-md border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-bronze"
+          disabled={pending}
+          className="mt-2 w-full resize-y rounded-md border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none focus:border-bronze disabled:opacity-60"
         />
       </label>
+      {error ? <p className="mt-4 text-sm text-red-400">{error}</p> : null}
       <button
         type="submit"
-        className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-bronze px-6 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-bronze-dark sm:w-auto"
+        disabled={pending}
+        className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-bronze px-6 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-bronze-dark disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
-        Request a Free Estimate
+        {pending ? "Sending…" : "Request a Free Estimate"}
       </button>
       <p className="mt-4 text-sm text-white/55">
         Prefer to talk?{" "}
