@@ -47,8 +47,14 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("Resend error:", error);
+      const detail = error.message || "Could not send your message.";
       return NextResponse.json(
-        { error: "Could not send your message. Please call or email us directly." },
+        {
+          error:
+            detail.includes("own email") || detail.includes("testing emails")
+              ? "Resend free plan can only send to your Resend account email until a domain is verified. Set CONTACT_TO_EMAIL to that address, or verify penny-street.com in Resend."
+              : `Email failed: ${detail}`,
+        },
         { status: 502 },
       );
     }
