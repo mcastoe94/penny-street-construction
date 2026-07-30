@@ -49,10 +49,9 @@ export const PROJECTS: Project[] = [
     services: ["Window & Door Installation"],
     description:
       "Full-home impact window upgrade for storm protection, quieter interiors, and cleaner elevations.",
-    image:
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80",
+    image: "/projects/impact-window-naples.jpg",
     gallery: [
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80",
+      "/projects/impact-window-naples.jpg",
       "https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=1200&q=80",
     ],
   },
